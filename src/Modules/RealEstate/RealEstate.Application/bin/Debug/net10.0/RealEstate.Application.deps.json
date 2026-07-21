@@ -14,7 +14,18 @@
           "RealEstate.Application.dll": {}
         }
       },
+      "BuildingBlocks/1.0.0": {
+        "runtime": {
+          "BuildingBlocks.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "RealEstate.Domain/1.0.0": {
+        "dependencies": {
+          "BuildingBlocks": "1.0.0"
+        },
         "runtime": {
           "RealEstate.Domain.dll": {
             "assemblyVersion": "1.0.0.0",
@@ -26,6 +37,11 @@
   },
   "libraries": {
     "RealEstate.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BuildingBlocks/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
