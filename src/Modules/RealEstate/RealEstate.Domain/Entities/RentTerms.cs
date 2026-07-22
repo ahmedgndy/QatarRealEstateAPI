@@ -1,6 +1,6 @@
 using System.Runtime;
 
-namespace RealEstate.Entities.Domain;
+namespace RealEstate.Domain.Entities;
 
 public class RentTerms
 {

@@ -1,4 +1,4 @@
-namespace RealEstate.Entities.Domain;
+namespace RealEstate.Domain.Entities;
 
 public class Money
 {

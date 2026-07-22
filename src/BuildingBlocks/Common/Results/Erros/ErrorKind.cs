@@ -1,4 +1,4 @@
-namespace BuildingBlocks.Common.Results.Error;
+namespace BuildingBlocks.Common.Results.Errors;
 
 
 public enum ErrorKind

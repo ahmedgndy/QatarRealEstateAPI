@@ -1,3 +1,5 @@
+using BuildingBlocks.Common.Results.Errors;
+
 namespace BuildingBlocks.Common.Results;
 
 public interface IResult

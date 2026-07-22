@@ -1,6 +1,6 @@
 using RealEstate.Domain.Enums;
 
-namespace RealEstate.Entities.Domain;
+namespace RealEstate.Domain.Entities;
 
 public class InstallmentPlan
 {

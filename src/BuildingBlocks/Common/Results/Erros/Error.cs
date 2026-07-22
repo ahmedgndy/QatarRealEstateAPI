@@ -1,7 +1,7 @@
-namespace BuildingBlocks.Common.Results.Error;
+namespace BuildingBlocks.Common.Results.Errors;
 
 
-public readonly record Error
+public readonly record struct Error
 {
 
     public string Code { get; }
