@@ -2,9 +2,11 @@
 using System.Security.Cryptography.X509Certificates;
 using BuildingBlocks.Common;
 using BuildingBlocks.Common.Results;
+using BuildingBlocks.Common.Results.Errors;
 using RealEstate.Domain.Constants;
 using RealEstate.Domain.DomainErros;
 using RealEstate.Domain.Enums;
+using RealEstate.Domain.ValueObjects;
 
 namespace RealEstate.Domain.Entities;
 

@@ -1,39 +1,42 @@
 using BuildingBlocks.Common;
+using BuildingBlocks.Common.Results;
+using RealEstate.Domain.DomainErros;
 
 namespace RealEstate.Domain.Entities;
 
 public class PropertyType : AuditableEntity
 {
     public string Name { get; private set; } = string.Empty;
-
     public string Description { get; private set; } = string.Empty;
 
     private PropertyType() { }
 
-    public static PropertyType Create(string name, string description)
+    public static Result<PropertyType> Create(string name, string description)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Property type name is required.", nameof(name));
+            return PropertyTypeErrors.NameRequired;
 
         if (string.IsNullOrWhiteSpace(description))
-            throw new ArgumentException("Property type description is required.", nameof(description));
+            return PropertyTypeErrors.DescriptionRequired;
 
         return new PropertyType
         {
-            Name = name,
-            Description = description
+            Name = name.Trim(),
+            Description = description.Trim()
         };
     }
 
-    public void Update(string name, string description)
+    public Result<Updated> Update(string name, string description)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Property type name is required.", nameof(name));
+            return PropertyTypeErrors.NameRequired;
 
         if (string.IsNullOrWhiteSpace(description))
-            throw new ArgumentException("Property type description is required.", nameof(description));
+            return PropertyTypeErrors.DescriptionRequired;
 
-        Name = name;
-        Description = description;
+        Name = name.Trim();
+        Description = description.Trim();
+
+        return Result.Updated;
     }
 }

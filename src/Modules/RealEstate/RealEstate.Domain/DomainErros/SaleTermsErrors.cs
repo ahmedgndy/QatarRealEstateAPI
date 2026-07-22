@@ -15,4 +15,7 @@ public static class SaleTermsErrors
 
     public static Error InstallmentPlanRequired =>
         Error.Validation("SaleTerms.InstallmentPlan.Required", "Installment plan is required for installment payment method.");
+
+    public static Error InstallmentPlanNotAllowed =>
+        Error.Validation("SaleTerms.InstallmentPlan.NotAllowed", "Installment plan is not allowed for this payment method.");
 }

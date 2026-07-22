@@ -1,4 +1,7 @@
 using BuildingBlocks.Common;
+using BuildingBlocks.Common.Results;
+using RealEstate.Domain.DomainErros;
+using System;
 
 namespace RealEstate.Domain.Entities;
 
@@ -16,27 +19,29 @@ public class PropertyFeature : AuditableEntity
 
     private PropertyFeature() { }
 
-    public static PropertyFeature Create(int propertyId, int featureId, string featureName, string featureValue, string? icon = null)
+    public static Result<PropertyFeature> Create(int propertyId, int featureId, string featureName, string featureValue, string? icon = null)
     {
         if (propertyId <= 0)
-            throw new ArgumentException("Property ID must be greater than 0.", nameof(propertyId));
+            return PropertyFeatureErrors.PropertyIdInvalid;
 
         if (featureId <= 0)
-            throw new ArgumentException("Feature ID must be greater than 0.", nameof(featureId));
+            return PropertyFeatureErrors.FeatureIdInvalid;
 
         if (string.IsNullOrWhiteSpace(featureName))
-            throw new ArgumentException("Feature name is required.", nameof(featureName));
+            return PropertyFeatureErrors.FeatureNameRequired;
 
         if (string.IsNullOrWhiteSpace(featureValue))
-            throw new ArgumentException("Feature value is required.", nameof(featureValue));
+            return PropertyFeatureErrors.FeatureValueRequired;
 
-        return new PropertyFeature
+        var pf = new PropertyFeature
         {
             PropertyId = propertyId,
             FeatureId = featureId,
-            FeatureName = featureName,
-            FeatureValue = featureValue,
-            Icon = icon
+            FeatureName = featureName.Trim(),
+            FeatureValue = featureValue.Trim(),
+            Icon = icon?.Trim()
         };
+
+        return pf;
     }
 }
