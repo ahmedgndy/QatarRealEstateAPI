@@ -40,9 +40,6 @@ public static class PropertyErrors
         Error.Validation("Property.ListingTerms.Missing", "A property must have either sale terms or rent terms.");
 
     // Media
-    public static Error TooManyMediaItems =>
-        Error.Validation("Property.Media.TooMany", "A property cannot have more than 20 media items.");
-
     public static Error PrimaryMediaRequired =>
         Error.Validation("Property.Media.PrimaryRequired", "A property must have exactly one primary image.");
 
@@ -57,6 +54,22 @@ public static class PropertyErrors
     public static Error AlreadyPublished =>
         Error.Conflict("Property.AlreadyPublished", "The property is already published.");
 
-    public static Error MediaRequired =>
-        Error.Validation("Property.Media.Required", "At least one media item is required for the property.");
+    // Property not published (used when attempting to unpublish/operate on unpublished)
+    public static Error NotPublished =>
+        Error.Validation("Property.NotPublished", "The property is not published.");
+
+    // Duplicate feature (forwarder to FeatureErrors for consistency)
+    public static Error DuplicateFeature => FeatureErrors.FeatureDuplicate;
+
+    // Media (forwarders for backward compatibility)
+    public static Error MultiplePrimaryMedia => MediaErrors.MultiplePrimaryMedia;
+    public static Error MediaNotFound => MediaErrors.MediaNotFound;
+    public static Error TooManyMediaItems => MediaErrors.TooManyMediaItems;
+    public static Error MediaRequired => MediaErrors.MediaRequired;
+
+    // Features (optional forwards)
+    public static Error FeatureRequired => FeatureErrors.FeatureRequired;
+    public static Error FeatureNotFound => FeatureErrors.FeatureNotFound;
+    public static Error FeatureDuplicate => FeatureErrors.FeatureDuplicate;
+
 }

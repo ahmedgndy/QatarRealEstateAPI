@@ -1,4 +1,5 @@
 using RealEstate.Domain.Enums;
+using RealEstate.Domain.ValueObjects;
 
 namespace RealEstate.Domain.Entities;
 
