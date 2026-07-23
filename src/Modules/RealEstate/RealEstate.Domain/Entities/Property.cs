@@ -1,5 +1,4 @@
-﻿
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Security.Cryptography.X509Certificates;
 using BuildingBlocks.Common;
 using BuildingBlocks.Common.Results;
 using BuildingBlocks.Common.Results.Errors;
@@ -22,7 +21,10 @@ public sealed class Property : AuditableEntity
     public SaleTerms? SaleTerms { get; private set; }
     public RentTerms? RentTerms { get; private set; }
     public Guid PropertyTypeId { get; private set; }
-    public PropertyStatus Status { get; private set; }
+    public PropertyStatus Status { get; private set; } = PropertyStatus.Draft;
+
+    public bool IsAvailable => Status == PropertyStatus.Published;
+    public PropertySpecs PropertySpecs { get; private set; }
 
     // read-only views out. AsReadOnly() blocks a caller from casting back to List and mutating.
     public IReadOnlyCollection<Media> Media => _media.AsReadOnly();
@@ -32,7 +34,7 @@ public sealed class Property : AuditableEntity
 
     private Property(Guid id, string title, string description,
                      Guid typeId, Location location,
-                     ListingKind kind, SaleTerms? sale, RentTerms? rent)
+                     ListingKind kind, SaleTerms? sale, RentTerms? rent, PropertySpecs? specs = null)
         : base(id)
     {
         Title = title;
@@ -43,21 +45,22 @@ public sealed class Property : AuditableEntity
         SaleTerms = sale;
         RentTerms = rent;
         Status = PropertyStatus.Draft;
+        PropertySpecs = specs ?? new PropertySpecs();
     }
 
     // ---- creation & editing -------------------------------------------------
 
     public static Result<Property> Create(Guid id, string title, string description,
-        Guid typeId, Location location, ListingKind kind, SaleTerms? sale, RentTerms? rent)
+        Guid typeId, Location location, ListingKind kind, SaleTerms? sale, RentTerms? rent, PropertySpecs? specs = null)
     {
-        if (Validate(title, description, typeId, location, kind, sale, rent) is { } error)
+        if (Validate(title, description, typeId, location, kind, sale, rent, specs) is { } error)
             return error;
 
         return new Property(id, title, description, typeId, location, kind, sale, rent);
     }
 
     public Result<Updated> Update(string title, string description,
-        Guid typeId, Location location, ListingKind kind, SaleTerms? sale, RentTerms? rent)
+        Guid typeId, Location location, ListingKind kind, SaleTerms? sale, RentTerms? rent, PropertySpecs? specs = null)
     {
         if (Validate(title, description, typeId, location, kind, sale, rent) is { } error)
             return error;
@@ -77,7 +80,7 @@ public sealed class Property : AuditableEntity
     // Returns the first broken rule, or null if everything is valid.
     // (Assumes your error type is named `Error`. Rename if yours is different.)
     private static Error? Validate(string title, string description, Guid typeId,
-        Location location, ListingKind kind, SaleTerms? sale, RentTerms? rent)
+        Location location, ListingKind kind, SaleTerms? sale, RentTerms? rent, PropertySpecs? specs = null)
     {
         if (string.IsNullOrWhiteSpace(title))
             return PropertyErrors.TitleRequired;
@@ -104,6 +107,17 @@ public sealed class Property : AuditableEntity
 
         if (kind == ListingKind.Rent && rent is null)
             return PropertyErrors.RentTermsRequired;
+        if (specs is not null)
+        {
+            if (specs.NumberOfRooms < 0)
+                return PropertyErrors.InvalidNumberOfRooms;
+
+            if (specs.AreaInSquareMeters < 0)
+                return PropertyErrors.InvalidArea;
+
+            if (specs.Bathrooms < 0)
+                return PropertyErrors.InvalidNumberOfBathrooms;
+        }
 
         return null;
     }
@@ -180,6 +194,17 @@ public sealed class Property : AuditableEntity
         _features.Add(feature);
         return Result.Updated;
     }
+    public Result<Updated> AddFeatures(IReadOnlyCollection<PropertyFeature> features)
+    {
+        if (features is null || features.Count == 0)
+            return PropertyErrors.FeatureRequired;
+
+        if (features.Any(f => _features.Contains(f)))
+            return PropertyErrors.DuplicateFeature;
+
+        _features.AddRange(features);
+        return Result.Updated;
+    }
 
     public Result<Updated> RemoveFeature(PropertyFeature feature)
     {
@@ -187,8 +212,19 @@ public sealed class Property : AuditableEntity
             return PropertyErrors.FeatureRequired;
 
         if (!_features.Remove(feature))
+            return PropertyErrors.FeatureNotFound;
+
+        return Result.Updated;
+    }
+    public Result<Updated> RemoveFeatures(IReadOnlyCollection<PropertyFeature> features)
+    {
+        if (features is null || features.Count == 0)
             return PropertyErrors.FeatureRequired;
 
+        if (features.Any(f => !_features.Contains(f)))
+            return PropertyErrors.FeatureNotFound;
+
+        _features.RemoveAll(features.Contains);
         return Result.Updated;
     }
 
@@ -199,12 +235,8 @@ public sealed class Property : AuditableEntity
         if (Status == PropertyStatus.Published)
             return PropertyErrors.AlreadyPublished;
 
-        if (_media.Count == 0)
-            return PropertyErrors.MediaRequired;
-
-        // Confirm with the business: a published listing needs a cover (primary) photo.
-        if (!_media.Any(m => m.IsPrimary))
-            return PropertyErrors.PrimaryMediaRequired;
+        if (Status == PropertyStatus.Archived || Status == PropertyStatus.Sold || Status == PropertyStatus.Rented)
+            return PropertyErrors.NotPublishable;
 
         Status = PropertyStatus.Published;
         return Result.Updated;
@@ -216,6 +248,33 @@ public sealed class Property : AuditableEntity
             return PropertyErrors.NotPublished;
 
         Status = PropertyStatus.Draft;
+        return Result.Updated;
+    }
+
+    public Result<Updated> Archive()
+    {
+        if (Status == PropertyStatus.Archived)
+            return PropertyErrors.AlreadyArchived;
+
+        Status = PropertyStatus.Archived;
+        return Result.Updated;
+    }
+
+    public Result<Updated> MarkAsSold()
+    {
+        if (Status != PropertyStatus.Published)
+            return PropertyErrors.NotPublished;
+
+        Status = PropertyStatus.Sold;
+        return Result.Updated;
+    }
+
+    public Result<Updated> MarkAsRented()
+    {
+        if (Status != PropertyStatus.Published)
+            return PropertyErrors.NotPublished;
+
+        Status = PropertyStatus.Rented;
         return Result.Updated;
     }
 
@@ -251,4 +310,23 @@ public sealed class Property : AuditableEntity
         PropertyTypeId = typeId;
         return Result.Updated;
     }
+
+    public Result<Updated> UpdatePropertySpecs(PropertySpecs specs)
+    {
+        if (specs is null)
+            return PropertyErrors.FeatureRequired;
+
+        if (specs.NumberOfRooms < 0)
+            return PropertyErrors.InvalidNumberOfRooms;
+
+        if (specs.AreaInSquareMeters < 0)
+            return PropertyErrors.InvalidArea;
+
+        if (specs.Bathrooms < 0)
+            return PropertyErrors.InvalidNumberOfBathrooms;
+
+        PropertySpecs = specs;
+        return Result.Updated;
+    }
+
 }

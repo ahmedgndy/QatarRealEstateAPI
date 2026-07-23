@@ -4,10 +4,14 @@ using RealEstate.Domain.DomainErros;
 
 namespace RealEstate.Domain.Entities;
 
+/// <summary>
+/// category of property, e.g., Apartment, Villa, Office, etc. This is a DDD entity with validation and factory methods.
+/// </summary>
 public class PropertyType : AuditableEntity
 {
     public string Name { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
+
 
     private PropertyType() { }
 

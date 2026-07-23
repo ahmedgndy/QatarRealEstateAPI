@@ -1,7 +1,7 @@
 using BuildingBlocks.Common.Results;
 using RealEstate.Domain.DomainErros;
 
-namespace RealEstate.Domain.Entities;
+namespace RealEstate.Domain.ValueObjects;
 
 /// <summary>
 /// Location as a DDD value object. Immutable, with a factory and validation that uses domain errors.

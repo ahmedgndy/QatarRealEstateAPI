@@ -1,3 +1,4 @@
+using BuildingBlocks.Common.Results;
 using BuildingBlocks.Common.Results.Errors;
 
 namespace RealEstate.Domain.DomainErros;
@@ -72,4 +73,18 @@ public static class PropertyErrors
     public static Error FeatureNotFound => FeatureErrors.FeatureNotFound;
     public static Error FeatureDuplicate => FeatureErrors.FeatureDuplicate;
 
+    public static Error InvalidNumberOfRooms =>
+          Error.Validation("Property.NumberOfRooms.Invalid", "Number of rooms must be greater than 0.");
+
+    public static Error InvalidArea =>
+        Error.Validation("Property.Area.Invalid", "Area must be greater than 0.");
+
+    public static Error InvalidNumberOfBathrooms =>
+        Error.Validation("Property.NumberOfBathrooms.Invalid", "Number of bathrooms must be greater than 0.");
+
+    public static Error NotPublishable =>
+        Error.Validation("Property.NotPublishable", "The property cannot be published in its current state.");
+
+    public static Error AlreadyArchived =>
+        Error.Conflict("Property.AlreadyArchived", "The property is already archived.");
 }
