@@ -56,4 +56,32 @@ public class Media : AuditableEntity
 
         return media;
     }
+
+    public Result<Updated> Update(string url, string mediaType, int width, int height, int order, bool isPrimary, int propertyId = 0)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return MediaErrors.UrlRequired;
+
+        if (string.IsNullOrWhiteSpace(mediaType))
+            return MediaErrors.MediaTypeRequired;
+
+        if (width <= 0 || height <= 0)
+            return MediaErrors.InvalidDimensions;
+
+        if (order < 0)
+            return MediaErrors.InvalidOrder;
+
+        if (propertyId < 0)
+            return MediaErrors.InvalidPropertyId;
+
+        Url = url.Trim();
+        MediaType = mediaType.Trim();
+        Width = width;
+        Height = height;
+        Order = order;
+        IsPrimary = isPrimary;
+        PropertyId = propertyId;
+
+        return Result.Updated;
+    }
 }
